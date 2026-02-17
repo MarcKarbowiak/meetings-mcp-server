@@ -110,7 +110,7 @@ describe('MCP e2e (stdio) resources + prompts', () => {
         expect(gherkinMsgText).toContain('TEXT:');
         expect(gherkinMsgText).toContain(sampleSentinel);
       } finally {
-        await transport.close().catch(() => undefined);
+        await transport.close();
       }
     }
   );

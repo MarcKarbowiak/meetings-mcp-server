@@ -188,7 +188,7 @@ describe('MCP e2e (Streamable HTTP) resources + prompts', () => {
           expect(gherkinMsgText).toContain('TEXT:');
           expect(gherkinMsgText).toContain(sampleSentinel);
         } finally {
-          await transport.close().catch(() => undefined);
+          await transport.close();
         }
       } finally {
         serverProcess.kill();
