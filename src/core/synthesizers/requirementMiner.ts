@@ -32,6 +32,10 @@ function cleanRequirementText(s: string): string {
   return normalizeSentence(withoutFiller);
 }
 
+function isInterrogativeSentence(s: string): boolean {
+  return /\?\s*$/.test(s.trim());
+}
+
 export function mineRequirementsDeterministic(text: string): { requirements: MinedRequirement[]; gaps: string[]; followUpQuestions: string[] } {
   const lines = toLines(text);
   const requirements: MinedRequirement[] = [];
@@ -49,6 +53,9 @@ export function mineRequirementsDeterministic(text: string): { requirements: Min
       .filter(Boolean);
 
     for (const s of sentences) {
+      // Questions in transcripts are often discovery prompts, not requirements.
+      // Example: "Should everyone see the same information?"
+      if (isInterrogativeSentence(s)) continue;
       if (!requirementLineRegex.test(s)) continue;
       const cleaned = cleanRequirementText(s);
       if (!cleaned) continue;

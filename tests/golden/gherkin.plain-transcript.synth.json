@@ -106,31 +106,6 @@
           "confidence": "low"
         },
         {
-          "name": "Should everyone see the same information?",
-          "given": [
-            "a user is using the product"
-          ],
-          "when": [
-            "the user everyone see the same information?"
-          ],
-          "then": [
-            "the system allows the action and produces an observable result"
-          ],
-          "evidence": [
-            {
-              "quote": "Should everyone see the same information?",
-              "sourceSpans": [
-                {
-                  "kind": "line-range",
-                  "startLine": 15,
-                  "endLine": 15
-                }
-              ]
-            }
-          ],
-          "confidence": "low"
-        },
-        {
           "name": "Project managers need full visibility across all projects",
           "given": [
             "a user is using the product"
@@ -250,6 +225,31 @@
                   "kind": "line-range",
                   "startLine": 27,
                   "endLine": 27
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "Audit log entry is recorded for internal note changes",
+          "given": [
+            "a support agent is using the product"
+          ],
+          "when": [
+            "the support agent adds or edits an internal note"
+          ],
+          "then": [
+            "an audit log entry is recorded"
+          ],
+          "evidence": [
+            {
+              "quote": "Jordan (Product Owner): We must record an audit log entry whenever a task is updated or an internal note is added.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 29,
+                  "endLine": 29
                 }
               ]
             }

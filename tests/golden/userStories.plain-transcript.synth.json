@@ -87,27 +87,6 @@
       "confidence": "low"
     },
     {
-      "asA": "user",
-      "iWant": "to everyone see the same information?",
-      "acceptanceCriteria": [
-        "The user can everyone see the same information?.",
-        "If the action cannot be completed, the system provides a clear error message."
-      ],
-      "evidence": [
-        {
-          "quote": "Should everyone see the same information?",
-          "sourceSpans": [
-            {
-              "kind": "line-range",
-              "startLine": 15,
-              "endLine": 15
-            }
-          ]
-        }
-      ],
-      "confidence": "low"
-    },
-    {
       "asA": "manager",
       "iWant": "to Project managers need full visibility across all projects",
       "acceptanceCriteria": [
@@ -206,6 +185,27 @@
               "kind": "line-range",
               "startLine": 27,
               "endLine": 27
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "compliance auditor",
+      "iWant": "to record an audit log entry whenever a task is updated or an internal note is added",
+      "acceptanceCriteria": [
+        "The compliance auditor can record an audit log entry whenever a task is updated or an internal note is added.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "Jordan (Product Owner): We must record an audit log entry whenever a task is updated or an internal note is added.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 29,
+              "endLine": 29
             }
           ]
         }
