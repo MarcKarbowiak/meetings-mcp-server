@@ -1,11 +1,16 @@
 # meetings-mcp-server
 
+[![CI](https://github.com/marckarbowiak/meetings-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/marckarbowiak/meetings-mcp-server/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
+
 Showcase **MCP (Model Context Protocol)** server in TypeScript.
 
 It exposes:
 - Tools: `UserStory-Extractor`, `Gherkin-Extractor`, `MeetingSignals-Extractor`
 - Resources: tenant-specific meeting guidance + signal taxonomy from `data/tenants/*`
 - Prompts: reusable templates to drive consistent extraction
+
+This repo is intentionally **deterministic** (no LLMs, no API keys). The tools are functional today: they parse text using lightweight heuristics and return structured JSON.
 
 ## Prereqs
 - Node.js 20+
@@ -43,6 +48,56 @@ npm run dev:http
 
 Then POST MCP JSON-RPC requests to:
 - `http://127.0.0.1:3000/mcp`
+
+## What the MCP surfaces do
+
+### Tools
+All tools accept the same input shape:
+```json
+{ "text": "...", "tenantId": "demo" }
+```
+All tools return `structuredContent` shaped like:
+```json
+{ "ok": true, "result": { "tenantId": "demo", "...": "..." } }
+```
+
+- `UserStory-Extractor`
+	- Extracts explicit user stories from lines like: `As a <persona> I want <goal> so that <value>`.
+	- Captures nearby Acceptance Criteria (`AC:` / `Acceptance Criteria:` + bullets).
+	- Emits `gaps` + `followUpQuestions` when stories are missing fields.
+	- Details: `docs/tools/UserStory-Extractor.md`
+
+- `Gherkin-Extractor`
+	- Extracts `Feature:` / `Scenario:` blocks and `Given/When/Then` steps.
+	- Supports `And` / `But` continuation steps.
+	- Emits `nonGherkinFindings` for lines that don’t fit Gherkin structure.
+	- Details: `docs/tools/Gherkin-Extractor.md`
+
+- `MeetingSignals-Extractor`
+	- Detects meeting “signals” like `Decision:`, `Action item:`, `Risk:`, `Dependency:`, `Open question:`.
+	- If `tenantId` is provided, it can use tenant-configured `extractionRules` from `data/tenants/<tenantId>/signals.json`.
+	- Emits `suggestedActions` based on what signals were detected.
+	- Details: `docs/tools/MeetingSignals-Extractor.md`
+
+### Resources (data channels)
+Resources expose tenant files as MCP resources:
+
+- `tenant://<tenantId>/guidance` → Markdown guidance text.
+	- Backed by: `data/tenants/<tenantId>/guidance.md`
+	- Details: `docs/resources/tenant-guidance.md`
+
+- `tenant://<tenantId>/signals` → JSON signal taxonomy + optional extraction rules.
+	- Backed by: `data/tenants/<tenantId>/signals.json`
+	- Details: `docs/resources/tenant-signals.md`
+
+### Prompts
+Prompts are reusable message templates for clients that want to drive consistent extraction.
+
+- `extract-user-stories` → A prompt that asks for user stories + acceptance criteria + follow-up questions.
+	- Details: `docs/prompts/extract-user-stories.md`
+
+- `extract-gherkin` → A prompt that asks for Gherkin Features/Scenarios/steps.
+	- Details: `docs/prompts/extract-gherkin.md`
 
 ## Tenant data
 Tenant files live in:
