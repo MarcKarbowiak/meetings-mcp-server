@@ -1,92 +1,17 @@
 import type { MinedRequirement } from './requirementMiner.js';
 import type { SynthesizedUserStory, UserStorySynthesisResult } from '../types.js';
 
-function inferPersona(reqText: string): string {
-  const t = reqText.toLowerCase();
-  // Prefer explicit operational roles over generic nouns that might appear in object phrases (e.g., "customer email").
-  if (t.includes('support agent') || t.includes('support agents') || /\bagents?\b/.test(t)) return 'support agent';
-  if (t.includes('admin')) return 'admin';
-  if (t.includes('manager')) return 'manager';
-  if (t.includes('product owner')) return 'product owner';
-  if (t.includes('audit') || t.includes('audit log') || t.includes('compliance')) return 'compliance auditor';
-  if (/\bcustomers?\b\s+(want|wants|need|needs|must|should|can|cannot|can't)\b/.test(t)) return 'customer';
-  return 'user';
-}
-
-function toSentence(s: string): string {
-  const trimmed = s.trim().replace(/[.]+$/g, '');
-  if (!trimmed) return '';
-  return `${trimmed[0]!.toUpperCase()}${trimmed.slice(1)}.`;
-}
-
-function normalizeCapabilityFromIWant(iWant: string): string {
-  let c = iWant.trim();
-  c = c.replace(/^to\s+/i, '');
-  c = c.replace(/^be\s+able\s+to\s+/i, '');
-  c = c.replace(/^able\s+to\s+/i, '');
-  c = c.replace(/\s+/g, ' ').trim();
-  return c;
-}
-
-function splitInlineConstraint(capability: string): { capability: string; constraint?: string } {
-  // Common transcript pattern: "... add X that customers cannot see"
-  const m = capability.match(/^(.*)\bthat\b\s+(.+\b(cannot|can't|must not)\b.+)$/i);
-  if (!m) return { capability };
-  const base = m[1]?.trim().replace(/[.]+$/g, '') ?? capability;
-  const constraint = m[2]?.trim() ?? undefined;
-  return { capability: base, constraint };
-}
-
-function splitButNotConstraint(capability: string): { capability: string; constraint?: string } {
-  // Common requirements phrasing: "view progress, but not edit anything"
-  const m = capability.match(/^(.*?)(?:,)?\s*\bbut\s+not\b\s+(.+)$/i);
-  if (!m) return { capability };
-  const base = (m[1] ?? capability).trim().replace(/[.]+$/g, '');
-  const constraint = (m[2] ?? '').trim().replace(/[.]+$/g, '');
-  if (!constraint) return { capability: base };
-  return { capability: base, constraint: `cannot ${constraint}` };
-}
-
-function extractOnlyConstraint(reqText: string): string | undefined {
-  // Example: "should only see the tasks they're assigned to"
-  const m = reqText.match(/\bonly\b\s+(.+)$/i);
-  const remainder = m?.[1]?.trim();
-  if (!remainder) return undefined;
-  // If the sentence already includes a verb phrase like "see ...", keep it.
-  return remainder.replace(/[.]+$/g, '');
-}
-
-function extractInvalidThing(reqText: string): string | undefined {
-  const m = reqText.match(/\binvalid\s+([a-z][a-z0-9_-]*)\b/i);
-  return m?.[1]?.toLowerCase();
-}
-
-function extractLockout(reqText: string): { attempts: number; thing?: string; durationMinutes: number } | undefined {
-  const t = reqText.toLowerCase();
-  if (!t.includes('lock')) return undefined;
-
-  const attemptsMatch = t.match(/\bafter\s+(\d+)\s+.*?(failed|invalid).*?(attempts?)\b|\b(\d+)\s+(failed|invalid)\s+(attempts?)\b/i);
-  const attemptsRaw = attemptsMatch?.[1] ?? attemptsMatch?.[4];
-  const attempts = attemptsRaw ? Number.parseInt(attemptsRaw, 10) : NaN;
-  if (!Number.isFinite(attempts) || attempts <= 0) return undefined;
-
-  const durationMatch = t.match(/\bfor\s+(\d+)\s+(minutes?|mins?)\b/i);
-  const durationRaw = durationMatch?.[1];
-  const durationMinutes = durationRaw ? Number.parseInt(durationRaw, 10) : NaN;
-  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) return undefined;
-
-  return { attempts, thing: extractInvalidThing(reqText), durationMinutes };
-}
-
-function extractPerformance(reqText: string): { withinSeconds: number } | undefined {
-  const t = reqText.toLowerCase();
-  if (!t.includes('within')) return undefined;
-  const m = t.match(/\bwithin\s+(\d+)\s*(seconds?|secs?|s)\b/i);
-  const raw = m?.[1];
-  const withinSeconds = raw ? Number.parseInt(raw, 10) : NaN;
-  if (!Number.isFinite(withinSeconds) || withinSeconds <= 0) return undefined;
-  return { withinSeconds };
-}
+import {
+  extractInvalidThing,
+  extractLockout,
+  extractOnlyConstraint,
+  extractPerformance,
+  inferPersona,
+  normalizeCapabilityFromIWant,
+  splitButNotConstraint,
+  splitInlineConstraint,
+  toSentence
+} from './intentParsing.js';
 
 function inferGoal(reqText: string): { iWant: string; soThat?: string } {
   // Special-case: conditional invalid input -> treat as validation/feedback capability.

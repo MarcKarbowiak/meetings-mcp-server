@@ -1,87 +1,25 @@
 import type { MinedRequirement } from './requirementMiner.js';
 import type { GherkinSynthesisResult, SynthesizedGherkinFeature, SynthesizedGherkinScenario } from '../types.js';
 
+import {
+  extractInvalidThing,
+  extractLockout,
+  extractPerformance,
+  extractVisibilityConstraint,
+  inferPersonaBasic,
+  isAuditRequirement,
+  isOnlyAssignedVisibility,
+  isViewButNotEdit,
+  normalizeCapabilityFromRequirementBasic
+} from './intentParsing.js';
+
 function scenarioNameFromRequirement(reqText: string): string {
   return reqText.trim().replace(/[.]+$/g, '');
 }
 
-function inferPersona(reqText: string): string {
-  const t = reqText.toLowerCase();
-  if (t.includes('support agent') || t.includes('support agents') || /\bagents?\b/.test(t)) return 'support agent';
-  if (t.includes('admin')) return 'admin';
-  if (/\bcustomers?\b\s+(want|wants|need|needs|must|should|can|cannot|can't)\b/.test(t)) return 'customer';
-  return 'user';
-}
-
-function extractInvalidThing(reqText: string): string | undefined {
-  const m = reqText.match(/\binvalid\s+([a-z][a-z0-9_-]*)\b/i);
-  return m?.[1]?.toLowerCase();
-}
-
-function extractLockout(reqText: string): { attempts: number; thing?: string; durationMinutes: number } | undefined {
-  const t = reqText.toLowerCase();
-  if (!t.includes('lock')) return undefined;
-
-  const attemptsMatch = t.match(/\bafter\s+(\d+)\s+.*?(failed|invalid).*?(attempts?)\b|\b(\d+)\s+(failed|invalid)\s+(attempts?)\b/i);
-  const attemptsRaw = attemptsMatch?.[1] ?? attemptsMatch?.[4];
-  const attempts = attemptsRaw ? Number.parseInt(attemptsRaw, 10) : NaN;
-  if (!Number.isFinite(attempts) || attempts <= 0) return undefined;
-
-  const durationMatch = t.match(/\bfor\s+(\d+)\s+(minutes?|mins?)\b/i);
-  const durationRaw = durationMatch?.[1];
-  const durationMinutes = durationRaw ? Number.parseInt(durationRaw, 10) : NaN;
-  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) return undefined;
-
-  return { attempts, thing: extractInvalidThing(reqText), durationMinutes };
-}
-
-function extractPerformance(reqText: string): { withinSeconds: number } | undefined {
-  const t = reqText.toLowerCase();
-  const m = t.match(/\bwithin\s+(\d+)\s*(seconds?|secs?|s)\b/i);
-  const raw = m?.[1];
-  const withinSeconds = raw ? Number.parseInt(raw, 10) : NaN;
-  if (!Number.isFinite(withinSeconds) || withinSeconds <= 0) return undefined;
-  return { withinSeconds };
-}
-
-function isAuditRequirement(reqText: string): boolean {
-  const t = reqText.toLowerCase();
-  return t.includes('audit log') || (t.includes('audit') && (t.includes('record') || t.includes('log')));
-}
-
-function isOnlyAssignedVisibility(reqText: string): boolean {
-  const t = reqText.toLowerCase();
-  return t.includes('only') && (t.includes("assigned") || t.includes("they're assigned") || t.includes('they are assigned')) && t.includes('see');
-}
-
-function isViewButNotEdit(reqText: string): boolean {
-  const t = reqText.toLowerCase();
-  return t.includes('view') && t.includes('but not') && t.includes('edit');
-}
-
-function extractVisibilityConstraint(reqText: string): { subject: string; object: string } | undefined {
-  // Specific, high-signal pattern used frequently in product meetings.
-  // Example: "customers cannot see" -> subject=customers, object=internal note
-  const t = reqText.toLowerCase();
-  const m = t.match(/\b(customers?|users?)\b\s+(cannot|can't|must not)\s+see\b/);
-  if (!m) return undefined;
-  // Try to recover the object by looking for "note" or a trailing noun phrase.
-  if (t.includes('note')) return { subject: m[1]!, object: 'the internal note' };
-  return { subject: m[1]!, object: 'the restricted content' };
-}
-
-function normalizeCapability(reqText: string): string {
-  // Best-effort extraction of the action/capability phrase.
-  const m = reqText.match(/\b(need to|needs to|must|should|have to|has to|can)\b\s+(.+?)(?:\bso that\b|$)/i);
-  const raw = (m?.[2] ?? reqText).trim().replace(/[.]+$/g, '');
-  const cleaned = raw.replace(/^be\s+able\s+to\s+/i, '').trim();
-  // Remove common inline constraint pattern: "... that customers cannot see"
-  return cleaned.replace(/\bthat\b\s+.+\b(cannot|can't|must not)\b.+$/i, '').trim();
-}
-
 function scenarioForGenericRequirement(reqText: string): { given: string[]; when: string[]; then: string[] } {
-  const persona = inferPersona(reqText);
-  const capability = normalizeCapability(reqText);
+  const persona = inferPersonaBasic(reqText);
+  const capability = normalizeCapabilityFromRequirementBasic(reqText);
 
   // System-display style requirements.
   if (/^(show|display)\b/i.test(capability)) {
@@ -116,7 +54,7 @@ export function synthesizeGherkinDeterministic(params: {
   for (const req of requirements) {
     if (scenarios.length >= maxScenarios) break;
 
-    const persona = inferPersona(req.text);
+    const persona = inferPersonaBasic(req.text);
     const invalidThing = extractInvalidThing(req.text);
     const visibility = extractVisibilityConstraint(req.text);
     const lockout = extractLockout(req.text);
