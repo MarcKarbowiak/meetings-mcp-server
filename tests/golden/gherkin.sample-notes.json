@@ -1,0 +1,46 @@
+{
+  "tenantId": "demo",
+  "features": [
+    {
+      "name": "Story extraction",
+      "scenarios": [
+        {
+          "name": "Extract a single explicit story",
+          "tags": [],
+          "given": [
+            "meeting notes with a user story"
+          ],
+          "when": [
+            "I run the extractor"
+          ],
+          "then": [
+            "I get one structured story"
+          ],
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 10,
+              "endLine": 16
+            }
+          ]
+        }
+      ],
+      "sourceSpans": [
+        {
+          "kind": "line-range",
+          "startLine": 9,
+          "endLine": 16
+        }
+      ]
+    }
+  ],
+  "nonGherkinFindings": [
+    "Line 1: Unrecognized line: Decision: Use stdio as the default transport.",
+    "Line 2: Unrecognized line: Action item: Add a Streamable HTTP entrypoint for later.",
+    "Line 4: Unrecognized line: As a product owner I want to extract user stories from meeting notes so that I can move faster from conversation to backlog.",
+    "Line 5: Unrecognized line: AC:",
+    "Line 6: Unrecognized line: - Recognize explicit \"As a ... I want ... so that ...\" sentences",
+    "Line 7: Unrecognized line: - Return follow-up questions when info is missing",
+    "Line 15: Unrecognized scenario line: Open question: Should we support scenario outlines?"
+  ]
+}

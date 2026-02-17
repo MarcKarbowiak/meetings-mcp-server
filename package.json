@@ -13,7 +13,9 @@
     "build": "tsc -p tsconfig.json",
     "start:stdio": "node dist/entrypoints/stdio.js",
     "start:http": "node dist/entrypoints/http.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
@@ -24,7 +26,8 @@
     "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20"

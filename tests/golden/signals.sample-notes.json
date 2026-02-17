@@ -1,0 +1,46 @@
+{
+  "tenantId": "demo",
+  "signals": [
+    {
+      "type": "Decision",
+      "confidence": "high",
+      "text": "Decision: Use stdio as the default transport.",
+      "sourceSpans": [
+        {
+          "kind": "line-range",
+          "startLine": 1,
+          "endLine": 1
+        }
+      ]
+    },
+    {
+      "type": "ActionItem",
+      "confidence": "high",
+      "text": "Action item: Add a Streamable HTTP entrypoint for later.",
+      "sourceSpans": [
+        {
+          "kind": "line-range",
+          "startLine": 2,
+          "endLine": 2
+        }
+      ]
+    },
+    {
+      "type": "OpenQuestion",
+      "confidence": "high",
+      "text": "Open question: Should we support scenario outlines?",
+      "sourceSpans": [
+        {
+          "kind": "line-range",
+          "startLine": 15,
+          "endLine": 15
+        }
+      ]
+    }
+  ],
+  "suggestedActions": [
+    "Assign each ActionItem an owner and due date.",
+    "Record each Decision with rationale and impacted systems.",
+    "Convert OpenQuestions into tracked follow-ups with owners."
+  ]
+}

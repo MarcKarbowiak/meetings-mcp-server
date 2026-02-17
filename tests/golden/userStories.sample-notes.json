@@ -1,0 +1,23 @@
+{
+  "tenantId": "demo",
+  "userStories": [
+    {
+      "asA": "product owner",
+      "iWant": "to extract user stories from meeting notes",
+      "soThat": "I can move faster from conversation to backlog.",
+      "acceptanceCriteria": [
+        "Recognize explicit \"As a ... I want ... so that ...\" sentences",
+        "Return follow-up questions when info is missing"
+      ],
+      "sourceSpans": [
+        {
+          "kind": "line-range",
+          "startLine": 4,
+          "endLine": 8
+        }
+      ]
+    }
+  ],
+  "gaps": [],
+  "followUpQuestions": []
+}
