@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "signals": [
+    {
+      "type": "Decision",
+      "examples": ["Decision: we ship behind a feature flag", "Decided: keep tenant config in-repo for the demo"]
+    },
+    {
+      "type": "ActionItem",
+      "examples": ["Action item: Alice drafts the README by Friday", "TODO: Bob implements tenant resources"]
+    },
+    {
+      "type": "OpenQuestion",
+      "examples": ["Open question: do we need scenario outlines?", "Question: what is the tenantId source of truth?"]
+    },
+    {
+      "type": "Risk",
+      "examples": ["Risk: parsing fails on messy transcripts", "Concern: HTTP mode needs auth if exposed"]
+    },
+    {
+      "type": "Dependency",
+      "examples": ["Dependency: waiting on product glossary", "Depends on: transcript provider timestamps"]
+    }
+  ]
+}

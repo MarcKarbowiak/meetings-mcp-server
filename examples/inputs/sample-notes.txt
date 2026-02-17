@@ -1,0 +1,15 @@
+Decision: Use stdio as the default transport.
+Action item: Add a Streamable HTTP entrypoint for later.
+
+As a product owner I want to extract user stories from meeting notes so that I can move faster from conversation to backlog.
+AC:
+- Recognize explicit "As a ... I want ... so that ..." sentences
+- Return follow-up questions when info is missing
+
+Feature: Story extraction
+  Scenario: Extract a single explicit story
+    Given meeting notes with a user story
+    When I run the extractor
+    Then I get one structured story
+
+Open question: Should we support scenario outlines?

@@ -1,0 +1,32 @@
+{
+  "name": "meetings-mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server showcase: extract User Stories and Gherkin from meeting transcripts/notes, with tenant-specific guidance resources.",
+  "license": "MIT",
+  "scripts": {
+    "dev:stdio": "tsx src/entrypoints/stdio.ts",
+    "dev:http": "tsx src/entrypoints/http.ts",
+    "demo:stdio": "npm run build && node dist/demo/stdioClient.js",
+    "demo:http": "npm run build && node dist/demo/httpClient.js",
+    "build": "tsc -p tsconfig.json",
+    "start:stdio": "node dist/entrypoints/stdio.js",
+    "start:http": "node dist/entrypoints/http.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "express": "^5.2.1",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
