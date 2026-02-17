@@ -100,6 +100,12 @@ Set these environment variables to enable LLM-backed synthesis:
 - `LLM_AUTH_MODE` (optional): `bearer` (default) | `api-key` | `none`
 - `LLM_MODEL` (optional)
 - `LLM_EXTRA_HEADERS_JSON` (optional): JSON object of extra headers
+- `LLM_TIMEOUT_MS` (optional): request timeout in milliseconds (default: `20000`)
+
+Validation notes:
+- `LLM_AUTH_MODE` must be one of `bearer`, `api-key`, `none`.
+- `LLM_EXTRA_HEADERS_JSON` must be a JSON object with string values (e.g. `{"x-foo":"bar"}`).
+- Invalid values fail fast with explicit startup/tool-call errors.
 
 OpenAI example:
 ```bash
@@ -120,10 +126,12 @@ Resources expose tenant files as MCP resources:
 
 - `tenant://<tenantId>/guidance` → Markdown guidance text.
 	- Backed by: `data/tenants/<tenantId>/guidance.md`
+	- Missing tenant/file returns a friendly error message with the requested `tenantId`.
 	- Details: `docs/resources/tenant-guidance.md`
 
 - `tenant://<tenantId>/signals` → JSON signal taxonomy + optional extraction rules.
 	- Backed by: `data/tenants/<tenantId>/signals.json`
+	- Missing tenant/file or invalid JSON returns a friendly error message with the requested `tenantId`.
 	- Details: `docs/resources/tenant-signals.md`
 
 Static knowledge resources (repo-owned guidance):
