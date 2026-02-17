@@ -14,7 +14,7 @@
     "start:stdio": "node dist/entrypoints/stdio.js",
     "start:http": "node dist/entrypoints/http.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "npm run build && vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
