@@ -21,6 +21,16 @@ function normalizeTemplateVar(value: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : value;
 }
 
+function toolTextResponse(params: { ok: boolean; result: unknown }): {
+  content: { type: 'text'; text: string }[];
+  structuredContent: { ok: boolean; result: unknown };
+} {
+  return {
+    content: [{ type: 'text', text: JSON.stringify(params, null, 2) }],
+    structuredContent: params
+  };
+}
+
 export type CreateServerOptions = {
   tenantRootDir: string;
   knowledgeRootDir?: string;
@@ -74,10 +84,7 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
     },
     async ({ text, tenantId }) => {
       const result = extractUserStories(text, tenantId);
-      return {
-        content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
-        structuredContent: { ok: true, result }
-      };
+      return toolTextResponse({ ok: true, result });
     }
   );
 
@@ -91,10 +98,7 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
     },
     async ({ text, tenantId }) => {
       const result = extractGherkin(text, tenantId);
-      return {
-        content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
-        structuredContent: { ok: true, result }
-      };
+      return toolTextResponse({ ok: true, result });
     }
   );
 
@@ -118,10 +122,7 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
       }
 
       const result = extractMeetingSignals(text, tenantId, { rules });
-      return {
-        content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
-        structuredContent: { ok: true, result }
-      };
+      return toolTextResponse({ ok: true, result });
     }
   );
 
@@ -146,20 +147,14 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
           gaps: ['LLM mode requested but LLM is not configured.'],
           followUpQuestions: ['Set LLM_CHAT_COMPLETIONS_URL and LLM_API_KEY (and optionally LLM_AUTH_MODE/LLM_MODEL).']
         };
-        return {
-          content: [{ type: 'text', text: JSON.stringify({ ok: false, result }, null, 2) }],
-          structuredContent: { ok: false, result }
-        };
+        return toolTextResponse({ ok: false, result });
       }
 
       if ((m === 'auto' || m === 'llm') && llmConfig) {
         try {
           const knowledge = knowledgeStore ? await knowledgeStore.readAll().catch(() => undefined) : undefined;
           const result = await synthesizeUserStoriesWithLlm({ config: llmConfig, tenantId, text, knowledge });
-          return {
-            content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
-            structuredContent: { ok: true, result }
-          };
+          return toolTextResponse({ ok: true, result });
         } catch {
           // fall through to deterministic
         }
@@ -169,10 +164,7 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
       const result = synthesizeUserStoriesDeterministic({ text, tenantId, requirements: mined.requirements, maxStories: maxItems });
       result.gaps.push(...mined.gaps);
       result.followUpQuestions.push(...mined.followUpQuestions);
-      return {
-        content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
-        structuredContent: { ok: true, result }
-      };
+      return toolTextResponse({ ok: true, result });
     }
   );
 
@@ -197,20 +189,14 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
           gaps: ['LLM mode requested but LLM is not configured.'],
           followUpQuestions: ['Set LLM_CHAT_COMPLETIONS_URL and LLM_API_KEY (and optionally LLM_AUTH_MODE/LLM_MODEL).']
         };
-        return {
-          content: [{ type: 'text', text: JSON.stringify({ ok: false, result }, null, 2) }],
-          structuredContent: { ok: false, result }
-        };
+        return toolTextResponse({ ok: false, result });
       }
 
       if ((m === 'auto' || m === 'llm') && llmConfig) {
         try {
           const knowledge = knowledgeStore ? await knowledgeStore.readAll().catch(() => undefined) : undefined;
           const result = await synthesizeGherkinWithLlm({ config: llmConfig, tenantId, text, knowledge });
-          return {
-            content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
-            structuredContent: { ok: true, result }
-          };
+          return toolTextResponse({ ok: true, result });
         } catch {
           // fall through to deterministic
         }
@@ -220,10 +206,7 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
       const result = synthesizeGherkinDeterministic({ text, tenantId, requirements: mined.requirements, maxScenarios: maxItems });
       result.gaps.push(...mined.gaps);
       result.followUpQuestions.push(...mined.followUpQuestions);
-      return {
-        content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
-        structuredContent: { ok: true, result }
-      };
+      return toolTextResponse({ ok: true, result });
     }
   );
 
