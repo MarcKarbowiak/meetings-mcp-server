@@ -78,8 +78,21 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
           reason: params.error ? toErrorMessage(params.error) : undefined
         }
       });
-    } catch {
-      // Never fail tool execution if logging transport is unavailable.
+    } catch (error) {
+      // Never fail tool execution if logging transport is unavailable, but do not swallow the error silently.
+      console.error(
+        '[meetings-mcp-server] failed to emit logging message',
+        JSON.stringify(
+          {
+            operation: params.operation,
+            tenantId: params.tenantId,
+            mode: params.mode,
+            reason: toErrorMessage(error)
+          },
+          null,
+          2
+        )
+      );
     }
   }
 

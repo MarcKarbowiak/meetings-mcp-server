@@ -52,16 +52,11 @@ export function compileMeetingSignalRulesFromTenantSignalsJson(signalsJson: unkn
   const rules = parsed.data.extractionRules;
   if (!rules || rules.length === 0) return undefined;
 
-  try {
-    return rules.map(r => ({
-      type: r.type,
-      confidence: r.confidence,
-      regexes: r.patterns.map(compileRegex)
-    }));
-  } catch {
-    // Invalid regex patterns: fall back to defaults.
-    return undefined;
-  }
+  return rules.map(r => ({
+    type: r.type,
+    confidence: r.confidence,
+    regexes: r.patterns.map(compileRegex)
+  }));
 }
 
 export type ExtractMeetingSignalsOptions = {

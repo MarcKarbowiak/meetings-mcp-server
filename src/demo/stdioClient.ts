@@ -69,7 +69,12 @@ async function main() {
       )
     );
   } finally {
-    await transport.close().catch(() => undefined);
+    try {
+      await transport.close();
+    } catch (error) {
+      console.error('Failed to close stdio transport:', error);
+      throw error;
+    }
   }
 }
 

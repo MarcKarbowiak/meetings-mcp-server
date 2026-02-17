@@ -140,7 +140,12 @@ async function main() {
         )
       );
     } finally {
-      await transport.close().catch(() => undefined);
+      try {
+        await transport.close();
+      } catch (error) {
+        console.error('Failed to close HTTP transport:', error);
+        throw error;
+      }
     }
   } finally {
     serverProcess.kill();

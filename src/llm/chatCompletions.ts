@@ -45,8 +45,9 @@ export function getChatCompletionsConfigFromEnv(): ChatCompletionsConfig | undef
   if (headersRaw) {
     try {
       extraHeaders = JSON.parse(headersRaw) as Record<string, string>;
-    } catch {
-      // ignore
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new Error(`Invalid LLM_EXTRA_HEADERS_JSON: ${reason}`);
     }
   }
 
@@ -96,7 +97,13 @@ export async function callChatCompletions(config: ChatCompletionsConfig, params:
   }
 
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
+    let text = '';
+    try {
+      text = await res.text();
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      text = `[failed to read error response body: ${reason}]`;
+    }
     throw new Error(`LLM request failed: ${res.status} ${res.statusText}\n${text}`);
   }
 
