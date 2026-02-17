@@ -1,5 +1,32 @@
 {
   "version": 1,
+  "extractionRules": [
+    {
+      "type": "Decision",
+      "confidence": "high",
+      "patterns": ["^\\s*(decision|decided|we decided|final decision)\\s*[:\\-]"]
+    },
+    {
+      "type": "ActionItem",
+      "confidence": "high",
+      "patterns": ["^\\s*(action item|ai|todo|to do|next step)\\s*[:\\-]"]
+    },
+    {
+      "type": "OpenQuestion",
+      "confidence": "high",
+      "patterns": ["^\\s*(question|open question|unknown)\\s*[:\\-]"]
+    },
+    {
+      "type": "Risk",
+      "confidence": "medium",
+      "patterns": ["^\\s*(risk|concern|blocker|issue)\\s*[:\\-]"]
+    },
+    {
+      "type": "Dependency",
+      "confidence": "medium",
+      "patterns": ["^\\s*(dependency|depends on|waiting on)\\s*[:\\-]"]
+    }
+  ],
   "signals": [
     {
       "type": "Decision",

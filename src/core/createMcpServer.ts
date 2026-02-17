@@ -2,7 +2,10 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import * as z from 'zod/v4';
 
 import { extractGherkin } from './extractors/gherkinExtractor.js';
-import { extractMeetingSignals } from './extractors/meetingSignalsExtractor.js';
+import {
+  compileMeetingSignalRulesFromTenantSignalsJson,
+  extractMeetingSignals
+} from './extractors/meetingSignalsExtractor.js';
 import { extractUserStories } from './extractors/userStoryExtractor.js';
 import { TenantStore } from './tenantStore.js';
 
@@ -86,7 +89,17 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
       outputSchema: ToolTextResultSchema
     },
     async ({ text, tenantId }) => {
-      const result = extractMeetingSignals(text, tenantId);
+      let rules = undefined;
+      if (tenantId) {
+        try {
+          const signals = await tenantStore.readSignals(tenantId);
+          rules = compileMeetingSignalRulesFromTenantSignalsJson(signals.signalsJson);
+        } catch {
+          // Fall back to defaults if tenant config isn't present/readable.
+        }
+      }
+
+      const result = extractMeetingSignals(text, tenantId, { rules });
       return {
         content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
         structuredContent: { ok: true, result }

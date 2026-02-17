@@ -51,6 +51,16 @@ Tenant files live in:
 
 A sample tenant `demo` is included.
 
+### Tenant signal extraction rules
+`signals.json` can optionally include `extractionRules` to control how `MeetingSignals-Extractor` detects signals for that tenant.
+
+- If `tenantId` is provided to the tool and `extractionRules` exist, those rules are used.
+- If rules are missing or invalid, the server falls back to its built-in defaults.
+
+Pattern format:
+- Plain regex source string (compiled with case-insensitive flag), e.g. `"^\\s*(decision)\\s*[:\\-]"`
+- Or `/.../flags` form, e.g. `"/^\\s*decision\\s*[:\\-]/i"`
+
 ## Notes
 - Extraction logic is intentionally lightweight (heuristics + parsing) to keep the repo runnable with no API keys.
 - You can later add an LLM provider to improve accuracy without changing tool contracts.
