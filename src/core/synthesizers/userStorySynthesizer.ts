@@ -13,6 +13,17 @@ import {
   toSentence
 } from './intentParsing.js';
 
+function normalizeCriterionForCompare(s: string): string {
+  return s.trim().replace(/[.]+$/g, '').replace(/\s+/g, ' ').toLowerCase();
+}
+
+function pushUniqueSentence(list: string[], sentence: string): void {
+  const normalized = normalizeCriterionForCompare(sentence);
+  if (!normalized) return;
+  if (list.some(existing => normalizeCriterionForCompare(existing) === normalized)) return;
+  list.push(sentence);
+}
+
 function inferGoal(reqText: string): { iWant: string; soThat?: string } {
   // Special-case: conditional invalid input -> treat as validation/feedback capability.
   if (/^\s*if\b/i.test(reqText) && /\b(show|display)\b/i.test(reqText) && /\berror\b/i.test(reqText)) {
@@ -76,30 +87,33 @@ export function synthesizeUserStoriesDeterministic(params: {
 
     // Happy path
     if (invalidThing) {
-      acceptanceCriteria.push(toSentence(`If a valid ${invalidThing} is provided, the system accepts it`));
+      pushUniqueSentence(acceptanceCriteria, toSentence(`If a valid ${invalidThing} is provided, the system accepts it`));
     } else if (/^(show|display)\b/i.test(capability)) {
       const shown = capability.replace(/^(show|display)\s+/i, '').trim();
-      acceptanceCriteria.push(toSentence(`The system shows ${shown}`));
+      pushUniqueSentence(acceptanceCriteria, toSentence(`The system shows ${shown}`));
     } else {
-      acceptanceCriteria.push(toSentence(`The ${persona} can ${capability}`));
+      pushUniqueSentence(acceptanceCriteria, toSentence(`The ${persona} can ${capability}`));
     }
 
     // Constraint / error / edge
     if (lockout) {
       const thing = lockout.thing ?? 'input';
-      acceptanceCriteria.push(toSentence(`After ${lockout.attempts} invalid ${thing} attempts, further searches are blocked for ${lockout.durationMinutes} minutes`));
+      pushUniqueSentence(
+        acceptanceCriteria,
+        toSentence(`After ${lockout.attempts} invalid ${thing} attempts, further searches are blocked for ${lockout.durationMinutes} minutes`)
+      );
     } else if (perf && /\b(search results|results)\b/i.test(req.text)) {
-      acceptanceCriteria.push(toSentence(`Search results are returned within ${perf.withinSeconds} seconds`));
+      pushUniqueSentence(acceptanceCriteria, toSentence(`Search results are returned within ${perf.withinSeconds} seconds`));
     } else if (onlyConstraint) {
-      acceptanceCriteria.push(toSentence(`The ${persona} can only ${onlyConstraint}`));
+      pushUniqueSentence(acceptanceCriteria, toSentence(`The ${persona} can only ${onlyConstraint}`));
     } else if (constraint) {
-      acceptanceCriteria.push(toSentence(`The ${persona} ${constraint}`));
+      pushUniqueSentence(acceptanceCriteria, toSentence(`The ${persona} ${constraint}`));
     } else if (invalidThing) {
-      acceptanceCriteria.push(toSentence(`If an invalid ${invalidThing} is provided, the system shows an error message`));
+      pushUniqueSentence(acceptanceCriteria, toSentence(`If an invalid ${invalidThing} is provided, the system shows an error message`));
     } else if (/\b(cannot|can't|must not|invalid|error|denied|reject|fails?)\b/i.test(req.text)) {
-      acceptanceCriteria.push(toSentence('Invalid input or prohibited actions result in a clear error message'));
+      pushUniqueSentence(acceptanceCriteria, toSentence('Invalid input or prohibited actions result in a clear error message'));
     } else {
-      acceptanceCriteria.push(toSentence('If the action cannot be completed, the system provides a clear error message'));
+      pushUniqueSentence(acceptanceCriteria, toSentence('If the action cannot be completed, the system provides a clear error message'));
     }
 
     stories.push({

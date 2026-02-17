@@ -31,6 +31,11 @@ function toolTextResponse(params: { ok: boolean; result: unknown }): {
   };
 }
 
+function toErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 export type CreateServerOptions = {
   tenantRootDir: string;
   knowledgeRootDir?: string;
@@ -54,6 +59,29 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
       }
     }
   );
+
+  async function logFallback(params: {
+    level: 'debug' | 'warning';
+    operation: 'tenant-signals-read' | 'knowledge-read-all' | 'llm-user-story-synthesis' | 'llm-gherkin-synthesis';
+    tenantId?: string;
+    mode?: 'auto' | 'deterministic' | 'llm';
+    error?: unknown;
+  }): Promise<void> {
+    try {
+      await server.sendLoggingMessage({
+        level: params.level,
+        logger: 'meetings-mcp-server',
+        data: {
+          operation: params.operation,
+          tenantId: params.tenantId,
+          mode: params.mode,
+          reason: params.error ? toErrorMessage(params.error) : undefined
+        }
+      });
+    } catch {
+      // Never fail tool execution if logging transport is unavailable.
+    }
+  }
 
   // -----------------
   // Tools
@@ -116,7 +144,13 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
         try {
           const signals = await tenantStore.readSignals(tenantId);
           rules = compileMeetingSignalRulesFromTenantSignalsJson(signals.signalsJson);
-        } catch {
+        } catch (error) {
+          await logFallback({
+            level: 'debug',
+            operation: 'tenant-signals-read',
+            tenantId,
+            error
+          });
           // Fall back to defaults if tenant config isn't present/readable.
         }
       }
@@ -152,10 +186,30 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
 
       if ((m === 'auto' || m === 'llm') && llmConfig) {
         try {
-          const knowledge = knowledgeStore ? await knowledgeStore.readAll().catch(() => undefined) : undefined;
+          let knowledge = undefined;
+          if (knowledgeStore) {
+            try {
+              knowledge = await knowledgeStore.readAll();
+            } catch (error) {
+              await logFallback({
+                level: 'debug',
+                operation: 'knowledge-read-all',
+                tenantId,
+                mode: m,
+                error
+              });
+            }
+          }
           const result = await synthesizeUserStoriesWithLlm({ config: llmConfig, tenantId, text, knowledge });
           return toolTextResponse({ ok: true, result });
-        } catch {
+        } catch (error) {
+          await logFallback({
+            level: 'warning',
+            operation: 'llm-user-story-synthesis',
+            tenantId,
+            mode: m,
+            error
+          });
           // fall through to deterministic
         }
       }
@@ -194,10 +248,30 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
 
       if ((m === 'auto' || m === 'llm') && llmConfig) {
         try {
-          const knowledge = knowledgeStore ? await knowledgeStore.readAll().catch(() => undefined) : undefined;
+          let knowledge = undefined;
+          if (knowledgeStore) {
+            try {
+              knowledge = await knowledgeStore.readAll();
+            } catch (error) {
+              await logFallback({
+                level: 'debug',
+                operation: 'knowledge-read-all',
+                tenantId,
+                mode: m,
+                error
+              });
+            }
+          }
           const result = await synthesizeGherkinWithLlm({ config: llmConfig, tenantId, text, knowledge });
           return toolTextResponse({ ok: true, result });
-        } catch {
+        } catch (error) {
+          await logFallback({
+            level: 'warning',
+            operation: 'llm-gherkin-synthesis',
+            tenantId,
+            mode: m,
+            error
+          });
           // fall through to deterministic
         }
       }

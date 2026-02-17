@@ -24,6 +24,14 @@ const ChatCompletionResponseSchema = z.object({
     .min(1)
 });
 
+function getLlmTimeoutMs(): number {
+  const raw = process.env.LLM_TIMEOUT_MS;
+  if (!raw) return 20_000;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return 20_000;
+  return parsed;
+}
+
 export function getChatCompletionsConfigFromEnv(): ChatCompletionsConfig | undefined {
   const url = process.env.LLM_CHAT_COMPLETIONS_URL;
   if (!url) return undefined;
@@ -66,11 +74,26 @@ export async function callChatCompletions(config: ChatCompletionsConfig, params:
   };
   if (config.model) body.model = config.model;
 
-  const res = await fetch(config.url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body)
-  });
+  const timeoutMs = getLlmTimeoutMs();
+  const abortController = new AbortController();
+  const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
+
+  let res: Response;
+  try {
+    res = await fetch(config.url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      signal: abortController.signal
+    });
+  } catch (error) {
+    if (abortController.signal.aborted) {
+      throw new Error(`LLM request timed out after ${timeoutMs}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutHandle);
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');

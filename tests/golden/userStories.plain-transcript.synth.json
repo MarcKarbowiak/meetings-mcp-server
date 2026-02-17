@@ -111,7 +111,6 @@
       "asA": "user",
       "iWant": "to only see the tasks they’re assigned to",
       "acceptanceCriteria": [
-        "The user can only see the tasks they’re assigned to.",
         "The user can only see the tasks they’re assigned to."
       ],
       "evidence": [

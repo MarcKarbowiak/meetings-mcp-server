@@ -36,6 +36,16 @@ function isInterrogativeSentence(s: string): boolean {
   return /\?\s*$/.test(s.trim());
 }
 
+function isMeetingMetaSentence(s: string): boolean {
+  const t = s.trim().toLowerCase();
+  if (/^(thanks|thank you)\s+for\s+joining\b/.test(t)) return true;
+  if (/^(today'?s\s+)?goal\s+is\b/.test(t)) return true;
+  if (/^(the\s+)?purpose\s+is\b/.test(t)) return true;
+  if (/^(the\s+)?agenda\s+is\b/.test(t)) return true;
+  if (/^let'?s\s+(talk\s+about|discuss|review)\b/.test(t)) return true;
+  return false;
+}
+
 export function mineRequirementsDeterministic(text: string): { requirements: MinedRequirement[]; gaps: string[]; followUpQuestions: string[] } {
   const lines = toLines(text);
   const requirements: MinedRequirement[] = [];
@@ -59,6 +69,7 @@ export function mineRequirementsDeterministic(text: string): { requirements: Min
       if (!requirementLineRegex.test(s)) continue;
       const cleaned = cleanRequirementText(s);
       if (!cleaned) continue;
+      if (isMeetingMetaSentence(cleaned)) continue;
       requirements.push({
         text: cleaned,
         evidence: [{ quote: s, sourceSpans: [spanForSingleLine(i + 1)] }]
