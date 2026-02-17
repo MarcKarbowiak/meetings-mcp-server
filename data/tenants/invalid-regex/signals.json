@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "extractionRules": [
+    {
+      "type": "ActionItem",
+      "confidence": "high",
+      "patterns": ["/^(*invalid-regex$/"]
+    }
+  ]
+}

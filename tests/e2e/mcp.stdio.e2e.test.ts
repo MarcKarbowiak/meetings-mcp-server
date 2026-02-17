@@ -1,18 +1,6 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { describe, expect, it } from 'vitest';
 
-type ToolCallResult = {
-  structuredContent?: unknown;
-};
-
-async function readGolden(repoRoot: string, filename: string): Promise<unknown> {
-  const raw = await readFile(join(repoRoot, 'tests', 'golden', filename), 'utf8');
-  return JSON.parse(raw) as unknown;
-}
+import { connectStdioClient, expectedToolNames, loadDemoInputs, readGolden, type ToolCallResult } from './helpers.js';
 
 describe('MCP e2e (stdio transport)', () => {
   it(
@@ -20,29 +8,17 @@ describe('MCP e2e (stdio transport)', () => {
     { timeout: 30_000 },
     async () => {
       const repoRoot = process.cwd();
-      const samplePath = join(repoRoot, 'examples', 'inputs', 'sample-notes.txt');
-      const text = await readFile(samplePath, 'utf8');
-      const plainPath = join(repoRoot, 'examples', 'inputs', 'plain-transcript.txt');
-      const plainText = await readFile(plainPath, 'utf8');
-      const tenantId = 'demo';
+      const { text, plainText, tenantId } = await loadDemoInputs(repoRoot);
 
-      const transport = new StdioClientTransport({
-        command: process.execPath,
-        args: [join(repoRoot, 'dist', 'entrypoints', 'stdio.js')],
-        cwd: repoRoot,
-        stderr: 'inherit'
+      const { client, transport } = await connectStdioClient({
+        repoRoot,
+        clientName: 'meetings-mcp-e2e-stdio'
       });
 
-      const client = new Client({ name: 'meetings-mcp-e2e-stdio', version: '0.1.0' }, { capabilities: {} });
-
       try {
-        await client.connect(transport);
-
         const tools = await client.listTools();
         const names = tools.tools.map(t => t.name).sort();
-        expect(names).toEqual(
-          ['Gherkin-Extractor', 'MeetingSignals-Extractor', 'UserStory-Extractor', 'UserStory-Synthesizer', 'Gherkin-Synthesizer'].sort()
-        );
+        expect(names).toEqual(expectedToolNames);
 
         const expectedUserStories = await readGolden(repoRoot, 'userStories.sample-notes.json');
         const expectedGherkin = await readGolden(repoRoot, 'gherkin.sample-notes.json');
@@ -81,7 +57,7 @@ describe('MCP e2e (stdio transport)', () => {
         expect(synthStories.structuredContent).toEqual({ ok: true, result: expectedSynthStories });
         expect(synthGherkin.structuredContent).toEqual({ ok: true, result: expectedSynthGherkin });
       } finally {
-        await transport.close().catch(() => undefined);
+        await transport.close();
       }
     }
   );

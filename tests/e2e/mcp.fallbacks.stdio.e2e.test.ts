@@ -56,6 +56,30 @@ describe('MCP e2e fallback paths (stdio transport)', () => {
           }
         });
 
+        const invalidRegexSignals = (await client.callTool({
+          name: 'MeetingSignals-Extractor',
+          arguments: {
+            text: 'Action item: create release checklist',
+            tenantId: 'invalid-regex'
+          }
+        })) as ToolCallResult;
+
+        expect(invalidRegexSignals.structuredContent).toEqual({
+          ok: true,
+          result: {
+            tenantId: 'invalid-regex',
+            signals: [
+              {
+                type: 'ActionItem',
+                confidence: 'high',
+                text: 'Action item: create release checklist',
+                sourceSpans: [{ kind: 'line-range', startLine: 1, endLine: 1 }]
+              }
+            ],
+            suggestedActions: ['Assign each ActionItem an owner and due date.']
+          }
+        });
+
         const synthStories = (await client.callTool({
           name: 'UserStory-Synthesizer',
           arguments: {
