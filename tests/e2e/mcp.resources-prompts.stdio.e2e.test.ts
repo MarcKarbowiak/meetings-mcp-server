@@ -76,6 +76,10 @@ describe('MCP e2e (stdio) resources + prompts', () => {
         const mappingGuidelinesText = (mappingGuidelines.contents[0] as { text?: string }).text ?? '';
         expect(normalizeText(mappingGuidelinesText)).toEqual(mappingGuidelinesExpected);
 
+        await expect(client.readResource({ uri: 'tenant://missing-tenant/guidance' })).rejects.toThrow(
+          'Tenant guidance not found for tenantId "missing-tenant"'
+        );
+
         const prompts = await client.listPrompts();
         const promptNames = prompts.prompts.map(p => p.name).sort();
         expect(promptNames).toEqual(['extract-gherkin', 'extract-user-stories'].sort());

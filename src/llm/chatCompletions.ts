@@ -24,6 +24,8 @@ const ChatCompletionResponseSchema = z.object({
     .min(1)
 });
 
+  const AllowedAuthModes: ChatCompletionsConfig['authMode'][] = ['bearer', 'api-key', 'none'];
+
 function getLlmTimeoutMs(): number {
   const raw = process.env.LLM_TIMEOUT_MS;
   if (!raw) return 20_000;
@@ -37,14 +39,34 @@ export function getChatCompletionsConfigFromEnv(): ChatCompletionsConfig | undef
   if (!url) return undefined;
 
   const apiKey = process.env.LLM_API_KEY;
-  const authMode = (process.env.LLM_AUTH_MODE as ChatCompletionsConfig['authMode']) ?? 'bearer';
+  const authModeRaw = process.env.LLM_AUTH_MODE ?? 'bearer';
+  if (!AllowedAuthModes.includes(authModeRaw as ChatCompletionsConfig['authMode'])) {
+    throw new Error(
+      `Invalid LLM_AUTH_MODE: ${authModeRaw}. Expected one of: ${AllowedAuthModes.join(', ')}`
+    );
+  }
+  const authMode = authModeRaw as ChatCompletionsConfig['authMode'];
   const model = process.env.LLM_MODEL;
 
   let extraHeaders: Record<string, string> | undefined;
   const headersRaw = process.env.LLM_EXTRA_HEADERS_JSON;
   if (headersRaw) {
     try {
-      extraHeaders = JSON.parse(headersRaw) as Record<string, string>;
+      const parsed = JSON.parse(headersRaw) as unknown;
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('must be a JSON object of string:string pairs');
+      }
+
+      const candidate = parsed as Record<string, unknown>;
+      const normalized: Record<string, string> = {};
+      for (const [key, value] of Object.entries(candidate)) {
+        if (typeof value !== 'string') {
+          throw new Error(`header value for "${key}" must be a string`);
+        }
+        normalized[key] = value;
+      }
+
+      extraHeaders = normalized;
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
       throw new Error(`Invalid LLM_EXTRA_HEADERS_JSON: ${reason}`);
