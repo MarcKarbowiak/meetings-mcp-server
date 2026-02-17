@@ -12,6 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const tenantRootDir = join(__dirname, '..', '..', 'data', 'tenants');
+const knowledgeRootDir = join(__dirname, '..', '..', 'data', 'knowledge');
 
 const port = process.env.MCP_PORT ? Number.parseInt(process.env.MCP_PORT, 10) : 3000;
 
@@ -24,7 +25,7 @@ async function main() {
   const app = createMcpExpressApp({ host: '127.0.0.1' });
   app.use(express.json({ limit: '2mb' }));
 
-  const server = createMeetingsMcpServer({ tenantRootDir });
+  const server = createMeetingsMcpServer({ tenantRootDir, knowledgeRootDir });
 
   const transport = new StreamableHTTPServerTransport({
     // IMPORTANT: Streamable HTTP transports in *stateless* mode cannot be reused across requests.

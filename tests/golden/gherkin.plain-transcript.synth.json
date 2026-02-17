@@ -1,0 +1,268 @@
+{
+  "tenantId": "demo",
+  "modeUsed": "deterministic",
+  "features": [
+    {
+      "name": "Meeting requirements",
+      "scenarios": [
+        {
+          "name": "The goal is to understand what you’d need from a potential app so we can shape the requirements",
+          "given": [
+            "a user is using the product"
+          ],
+          "when": [
+            "the user shape the requirements"
+          ],
+          "then": [
+            "the system allows the action and produces an observable result"
+          ],
+          "evidence": [
+            {
+              "quote": "The goal is to understand what you’d need from a potential app so we can shape the requirements.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 1,
+                  "endLine": 1
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "The dashboard should include an indicator when a project is behind schedule",
+          "given": [
+            "a user is using the product"
+          ],
+          "when": [
+            "the user include an indicator when a project is behind schedule"
+          ],
+          "then": [
+            "the system allows the action and produces an observable result"
+          ],
+          "evidence": [
+            {
+              "quote": "Alex (Customer): The dashboard should include an indicator when a project is behind schedule.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 8,
+                  "endLine": 8
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "Team members need to update their tasks directly in the app",
+          "given": [
+            "a user is using the product"
+          ],
+          "when": [
+            "the user update their tasks directly in the app"
+          ],
+          "then": [
+            "the system allows the action and produces an observable result"
+          ],
+          "evidence": [
+            {
+              "quote": "Alex (Customer): Team members need to update their tasks directly in the app.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 12,
+                  "endLine": 12
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "If someone has an overdue task or an upcoming deadline, the app should remind them automatically",
+          "given": [
+            "a user is using the product"
+          ],
+          "when": [
+            "the user remind them automatically"
+          ],
+          "then": [
+            "the system allows the action and produces an observable result"
+          ],
+          "evidence": [
+            {
+              "quote": "Alex (Customer): If someone has an overdue task or an upcoming deadline, the app should remind them automatically.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 13,
+                  "endLine": 13
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "Should everyone see the same information?",
+          "given": [
+            "a user is using the product"
+          ],
+          "when": [
+            "the user everyone see the same information?"
+          ],
+          "then": [
+            "the system allows the action and produces an observable result"
+          ],
+          "evidence": [
+            {
+              "quote": "Should everyone see the same information?",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 15,
+                  "endLine": 15
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "Project managers need full visibility across all projects",
+          "given": [
+            "a user is using the product"
+          ],
+          "when": [
+            "the user Project managers need full visibility across all projects"
+          ],
+          "then": [
+            "the system allows the action and produces an observable result"
+          ],
+          "evidence": [
+            {
+              "quote": "Alex (Customer): Project managers need full visibility across all projects.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 17,
+                  "endLine": 17
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "Contributors only see assigned tasks",
+          "given": [
+            "an individual contributor has an assigned task and an unassigned task exists"
+          ],
+          "when": [
+            "the contributor views their task list"
+          ],
+          "then": [
+            "assigned tasks are visible",
+            "unassigned tasks are not visible"
+          ],
+          "evidence": [
+            {
+              "quote": "Alex (Customer): Individual contributors should only see the tasks they’re assigned to.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 18,
+                  "endLine": 18
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "Executives can view progress but cannot edit",
+          "given": [
+            "an executive is viewing project progress"
+          ],
+          "when": [
+            "the executive attempts to edit a project status"
+          ],
+          "then": [
+            "the system prevents editing"
+          ],
+          "evidence": [
+            {
+              "quote": "Alex (Customer): Executives should be able to view progress, but not edit anything.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 19,
+                  "endLine": 19
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "We need to export project summaries to PDF or Excel",
+          "given": [
+            "a user is using the product"
+          ],
+          "when": [
+            "the user export project summaries to PDF or Excel"
+          ],
+          "then": [
+            "the system allows the action and produces an observable result"
+          ],
+          "evidence": [
+            {
+              "quote": "Alex (Customer): We need to export project summaries to PDF or Excel.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 23,
+                  "endLine": 23
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        },
+        {
+          "name": "Project deadlines should sync to our calendars automatically",
+          "given": [
+            "a user is using the product"
+          ],
+          "when": [
+            "the user sync to our calendars automatically"
+          ],
+          "then": [
+            "the system allows the action and produces an observable result"
+          ],
+          "evidence": [
+            {
+              "quote": "Alex (Customer): Project deadlines should sync to our calendars automatically.",
+              "sourceSpans": [
+                {
+                  "kind": "line-range",
+                  "startLine": 27,
+                  "endLine": 27
+                }
+              ]
+            }
+          ],
+          "confidence": "low"
+        }
+      ]
+    }
+  ],
+  "gaps": [],
+  "followUpQuestions": [
+    "What are the preconditions/data setup for each scenario?",
+    "What are the success criteria and error cases?",
+    "Which scenarios are highest priority for automation?"
+  ]
+}

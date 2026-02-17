@@ -6,11 +6,14 @@
 Showcase **MCP (Model Context Protocol)** server in TypeScript.
 
 It exposes:
-- Tools: `UserStory-Extractor`, `Gherkin-Extractor`, `MeetingSignals-Extractor`
+- Tools: `UserStory-Extractor`, `Gherkin-Extractor`, `MeetingSignals-Extractor`, `UserStory-Synthesizer`, `Gherkin-Synthesizer`
 - Resources: tenant-specific meeting guidance + signal taxonomy from `data/tenants/*`
 - Prompts: reusable templates to drive consistent extraction
 
-This repo is intentionally **deterministic** (no LLMs, no API keys). The tools are functional today: they parse text using lightweight heuristics and return structured JSON.
+This repo is **deterministic by default** (no API keys required).
+
+- The *Extractors* are deterministic only.
+- The *Synthesizers* can optionally use an **OpenAI-compatible** chat-completions endpoint if you provide env vars; they always support a deterministic fallback.
 
 ## Prereqs
 - Node.js 20+
@@ -52,7 +55,7 @@ Then POST MCP JSON-RPC requests to:
 ## What the MCP surfaces do
 
 ### Tools
-All tools accept the same input shape:
+Extractor tools accept the same input shape:
 ```json
 { "text": "...", "tenantId": "demo" }
 ```
@@ -79,6 +82,39 @@ All tools return `structuredContent` shaped like:
 	- Emits `suggestedActions` based on what signals were detected.
 	- Details: `docs/tools/MeetingSignals-Extractor.md`
 
+- `UserStory-Synthesizer`
+	- Synthesizes user stories from plain-English transcripts/notes.
+	- Supports `mode`: `auto` (default), `deterministic`, `llm`.
+	- Details: `docs/tools/UserStory-Synthesizer.md`
+
+- `Gherkin-Synthesizer`
+	- Synthesizes Gherkin-style Features/Scenarios from plain-English transcripts/notes.
+	- Supports `mode`: `auto` (default), `deterministic`, `llm`.
+	- Details: `docs/tools/Gherkin-Synthesizer.md`
+
+### Optional LLM configuration (Synthesizers only)
+Set these environment variables to enable LLM-backed synthesis:
+
+- `LLM_CHAT_COMPLETIONS_URL` (required to enable LLM)
+- `LLM_API_KEY` (required unless `LLM_AUTH_MODE=none`)
+- `LLM_AUTH_MODE` (optional): `bearer` (default) | `api-key` | `none`
+- `LLM_MODEL` (optional)
+- `LLM_EXTRA_HEADERS_JSON` (optional): JSON object of extra headers
+
+OpenAI example:
+```bash
+set LLM_CHAT_COMPLETIONS_URL=https://api.openai.com/v1/chat/completions
+set LLM_AUTH_MODE=bearer
+set LLM_API_KEY=...your key...
+```
+
+Azure OpenAI example (OpenAI-compatible chat-completions):
+```bash
+set LLM_CHAT_COMPLETIONS_URL=https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT/chat/completions?api-version=YYYY-MM-DD
+set LLM_AUTH_MODE=api-key
+set LLM_API_KEY=...your key...
+```
+
 ### Resources (data channels)
 Resources expose tenant files as MCP resources:
 
@@ -89,6 +125,14 @@ Resources expose tenant files as MCP resources:
 - `tenant://<tenantId>/signals` → JSON signal taxonomy + optional extraction rules.
 	- Backed by: `data/tenants/<tenantId>/signals.json`
 	- Details: `docs/resources/tenant-signals.md`
+
+Static knowledge resources (repo-owned guidance):
+
+- `knowledge://user-story-structure` → User story structure guidance.
+- `knowledge://gherkin-structure` → Gherkin structure guidance.
+- `knowledge://mapping-guidelines` → How to map meeting text to stories/scenarios.
+	- Backed by: `data/knowledge/*`
+	- Details: `docs/resources/knowledge-docs.md`
 
 ### Prompts
 Prompts are reusable message templates for clients that want to drive consistent extraction.
@@ -118,4 +162,4 @@ Pattern format:
 
 ## Notes
 - Extraction logic is intentionally lightweight (heuristics + parsing) to keep the repo runnable with no API keys.
-- You can later add an LLM provider to improve accuracy without changing tool contracts.
+- You can optionally configure an OpenAI-compatible endpoint to improve synthesis accuracy without changing tool contracts.

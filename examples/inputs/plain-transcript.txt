@@ -1,0 +1,30 @@
+Jordan (Product Owner): Thanks for joining today, Alex. The goal is to understand what you’d need from a potential app so we can shape the requirements.
+
+Alex (Customer): The biggest issue is visibility. We run multiple client projects at the same time, and information is scattered across spreadsheets, emails, and chat messages.
+
+Jordan (Product Owner): If you imagine opening the app in the morning, what’s the first thing you’d want to see?
+
+Alex (Customer): I’d like a dashboard that shows all active projects, their current status, and who’s responsible.
+Alex (Customer): The dashboard should include an indicator when a project is behind schedule.
+
+Jordan (Product Owner): How do updates happen today when a task changes status?
+
+Alex (Customer): Team members need to update their tasks directly in the app.
+Alex (Customer): If someone has an overdue task or an upcoming deadline, the app should remind them automatically.
+
+Jordan (Product Owner): Let’s talk about access. Should everyone see the same information?
+
+Alex (Customer): Project managers need full visibility across all projects.
+Alex (Customer): Individual contributors should only see the tasks they’re assigned to.
+Alex (Customer): Executives should be able to view progress, but not edit anything.
+
+Jordan (Product Owner): Do you report project status outside the team?
+
+Alex (Customer): We need to export project summaries to PDF or Excel.
+
+Jordan (Product Owner): Any integrations that would make this more useful day-to-day?
+
+Alex (Customer): Project deadlines should sync to our calendars automatically.
+
+Jordan (Product Owner): We must record an audit log entry whenever a task is updated or an internal note is added.
+Jordan (Product Owner): The dashboard should load within 2 seconds for up to 100 active projects.

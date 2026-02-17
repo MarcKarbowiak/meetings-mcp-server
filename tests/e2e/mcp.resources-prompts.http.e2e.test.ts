@@ -115,6 +115,9 @@ describe('MCP e2e (Streamable HTTP) resources + prompts', () => {
           const uris = resources.resources.map(r => r.uri);
           expect(uris).toContain(`tenant://${tenantId}/guidance`);
           expect(uris).toContain(`tenant://${tenantId}/signals`);
+          expect(uris).toContain('knowledge://user-story-structure');
+          expect(uris).toContain('knowledge://gherkin-structure');
+          expect(uris).toContain('knowledge://mapping-guidelines');
 
           const guidanceExpected = normalizeText(
             await readFile(join(repoRoot, 'data', 'tenants', tenantId, 'guidance.md'), 'utf8')
@@ -130,6 +133,30 @@ describe('MCP e2e (Streamable HTTP) resources + prompts', () => {
           expect(signals.contents.length).toBeGreaterThan(0);
           const signalsText = (signals.contents[0] as { text?: string }).text ?? '';
           expect(JSON.parse(signalsText)).toEqual(signalsExpected);
+
+          const userStoryStructureExpected = normalizeText(
+            await readFile(join(repoRoot, 'data', 'knowledge', 'user-story-structure.md'), 'utf8')
+          );
+          const userStoryStructure = await client.readResource({ uri: 'knowledge://user-story-structure' });
+          expect(userStoryStructure.contents.length).toBeGreaterThan(0);
+          const userStoryStructureText = (userStoryStructure.contents[0] as { text?: string }).text ?? '';
+          expect(normalizeText(userStoryStructureText)).toEqual(userStoryStructureExpected);
+
+          const gherkinStructureExpected = normalizeText(
+            await readFile(join(repoRoot, 'data', 'knowledge', 'gherkin-structure.md'), 'utf8')
+          );
+          const gherkinStructure = await client.readResource({ uri: 'knowledge://gherkin-structure' });
+          expect(gherkinStructure.contents.length).toBeGreaterThan(0);
+          const gherkinStructureText = (gherkinStructure.contents[0] as { text?: string }).text ?? '';
+          expect(normalizeText(gherkinStructureText)).toEqual(gherkinStructureExpected);
+
+          const mappingGuidelinesExpected = normalizeText(
+            await readFile(join(repoRoot, 'data', 'knowledge', 'mapping-guidelines.md'), 'utf8')
+          );
+          const mappingGuidelines = await client.readResource({ uri: 'knowledge://mapping-guidelines' });
+          expect(mappingGuidelines.contents.length).toBeGreaterThan(0);
+          const mappingGuidelinesText = (mappingGuidelines.contents[0] as { text?: string }).text ?? '';
+          expect(normalizeText(mappingGuidelinesText)).toEqual(mappingGuidelinesExpected);
 
           const prompts = await client.listPrompts();
           const promptNames = prompts.prompts.map(p => p.name).sort();

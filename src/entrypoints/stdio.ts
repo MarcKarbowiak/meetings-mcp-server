@@ -9,9 +9,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const tenantRootDir = join(__dirname, '..', '..', 'data', 'tenants');
+const knowledgeRootDir = join(__dirname, '..', '..', 'data', 'knowledge');
 
 async function main() {
-  const server = createMeetingsMcpServer({ tenantRootDir });
+  const server = createMeetingsMcpServer({ tenantRootDir, knowledgeRootDir });
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

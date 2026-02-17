@@ -1,0 +1,222 @@
+{
+  "tenantId": "demo",
+  "modeUsed": "deterministic",
+  "stories": [
+    {
+      "asA": "user",
+      "iWant": "to The goal is to understand what you’d need from a potential app so we can shape the requirements",
+      "acceptanceCriteria": [
+        "The user can The goal is to understand what you’d need from a potential app so we can shape the requirements.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "The goal is to understand what you’d need from a potential app so we can shape the requirements.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 1,
+              "endLine": 1
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "user",
+      "iWant": "to include an indicator when a project is behind schedule",
+      "acceptanceCriteria": [
+        "The user can include an indicator when a project is behind schedule.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "Alex (Customer): The dashboard should include an indicator when a project is behind schedule.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 8,
+              "endLine": 8
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "user",
+      "iWant": "to update their tasks directly in the app",
+      "acceptanceCriteria": [
+        "The user can update their tasks directly in the app.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "Alex (Customer): Team members need to update their tasks directly in the app.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 12,
+              "endLine": 12
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "user",
+      "iWant": "to remind them automatically",
+      "acceptanceCriteria": [
+        "The user can remind them automatically.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "Alex (Customer): If someone has an overdue task or an upcoming deadline, the app should remind them automatically.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 13,
+              "endLine": 13
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "user",
+      "iWant": "to everyone see the same information?",
+      "acceptanceCriteria": [
+        "The user can everyone see the same information?.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "Should everyone see the same information?",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 15,
+              "endLine": 15
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "manager",
+      "iWant": "to Project managers need full visibility across all projects",
+      "acceptanceCriteria": [
+        "The manager can Project managers need full visibility across all projects.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "Alex (Customer): Project managers need full visibility across all projects.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 17,
+              "endLine": 17
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "user",
+      "iWant": "to only see the tasks they’re assigned to",
+      "acceptanceCriteria": [
+        "The user can only see the tasks they’re assigned to.",
+        "The user can only see the tasks they’re assigned to."
+      ],
+      "evidence": [
+        {
+          "quote": "Alex (Customer): Individual contributors should only see the tasks they’re assigned to.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 18,
+              "endLine": 18
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "user",
+      "iWant": "to view progress",
+      "acceptanceCriteria": [
+        "The user can view progress.",
+        "The user cannot edit anything."
+      ],
+      "evidence": [
+        {
+          "quote": "Alex (Customer): Executives should be able to view progress, but not edit anything.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 19,
+              "endLine": 19
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "user",
+      "iWant": "to export project summaries to PDF or Excel",
+      "acceptanceCriteria": [
+        "The user can export project summaries to PDF or Excel.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "Alex (Customer): We need to export project summaries to PDF or Excel.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 23,
+              "endLine": 23
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    },
+    {
+      "asA": "user",
+      "iWant": "to sync to our calendars automatically",
+      "acceptanceCriteria": [
+        "The user can sync to our calendars automatically.",
+        "If the action cannot be completed, the system provides a clear error message."
+      ],
+      "evidence": [
+        {
+          "quote": "Alex (Customer): Project deadlines should sync to our calendars automatically.",
+          "sourceSpans": [
+            {
+              "kind": "line-range",
+              "startLine": 27,
+              "endLine": 27
+            }
+          ]
+        }
+      ],
+      "confidence": "low"
+    }
+  ],
+  "gaps": [],
+  "followUpQuestions": [
+    "Which user roles/personas should we prioritize?",
+    "What are the acceptance criteria for each story (success + error cases)?",
+    "Are there non-functional requirements (latency, audit, security) that apply?"
+  ]
+}

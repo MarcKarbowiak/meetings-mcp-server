@@ -7,7 +7,13 @@ import {
   extractMeetingSignals
 } from './extractors/meetingSignalsExtractor.js';
 import { extractUserStories } from './extractors/userStoryExtractor.js';
+import { mineRequirementsDeterministic } from './synthesizers/requirementMiner.js';
+import { synthesizeGherkinDeterministic } from './synthesizers/gherkinSynthesizer.js';
+import { synthesizeUserStoriesDeterministic } from './synthesizers/userStorySynthesizer.js';
+import { KnowledgeStore } from './knowledgeStore.js';
 import { TenantStore } from './tenantStore.js';
+import { getChatCompletionsConfigFromEnv } from '../llm/chatCompletions.js';
+import { synthesizeGherkinWithLlm, synthesizeUserStoriesWithLlm } from '../llm/synthesize.js';
 
 const ToolTextResultSchema = z.object({ ok: z.boolean(), result: z.unknown() });
 
@@ -17,12 +23,14 @@ function normalizeTemplateVar(value: string | string[]): string {
 
 export type CreateServerOptions = {
   tenantRootDir: string;
+  knowledgeRootDir?: string;
   serverName?: string;
   serverVersion?: string;
 };
 
 export function createMeetingsMcpServer(options: CreateServerOptions): McpServer {
   const tenantStore = new TenantStore(options.tenantRootDir);
+  const knowledgeStore = options.knowledgeRootDir ? new KnowledgeStore(options.knowledgeRootDir) : undefined;
 
   const server = new McpServer(
     {
@@ -44,6 +52,16 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
   const extractorInputSchema = z.object({
     text: z.string().describe('Transcript or notes content'),
     tenantId: z.string().optional().describe('Tenant ID (matches data/tenants/<tenantId>)')
+  });
+
+  const synthInputSchema = z.object({
+    text: z.string().describe('Meeting transcript or notes (plain English is fine)'),
+    tenantId: z.string().optional().describe('Tenant ID (matches data/tenants/<tenantId>)'),
+    mode: z
+      .enum(['auto', 'deterministic', 'llm'])
+      .optional()
+      .describe('auto=use LLM if configured, else deterministic; deterministic=never call LLM; llm=require LLM'),
+    maxItems: z.number().int().min(1).max(50).optional().describe('Max stories/scenarios to synthesize')
   });
 
   server.registerTool(
@@ -107,6 +125,108 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
     }
   );
 
+  server.registerTool(
+    'UserStory-Synthesizer',
+    {
+      title: 'User Story Synthesizer',
+      description:
+        'Synthesizes user stories from plain-English meeting transcripts/notes. Uses an LLM if configured (optional) and falls back to deterministic mining.',
+      inputSchema: synthInputSchema,
+      outputSchema: ToolTextResultSchema
+    },
+    async ({ text, tenantId, mode, maxItems }) => {
+      const m = mode ?? 'auto';
+      const llmConfig = getChatCompletionsConfigFromEnv();
+
+      if (m === 'llm' && !llmConfig) {
+        const result = {
+          tenantId,
+          modeUsed: 'deterministic' as const,
+          stories: [],
+          gaps: ['LLM mode requested but LLM is not configured.'],
+          followUpQuestions: ['Set LLM_CHAT_COMPLETIONS_URL and LLM_API_KEY (and optionally LLM_AUTH_MODE/LLM_MODEL).']
+        };
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ ok: false, result }, null, 2) }],
+          structuredContent: { ok: false, result }
+        };
+      }
+
+      if ((m === 'auto' || m === 'llm') && llmConfig) {
+        try {
+          const knowledge = knowledgeStore ? await knowledgeStore.readAll().catch(() => undefined) : undefined;
+          const result = await synthesizeUserStoriesWithLlm({ config: llmConfig, tenantId, text, knowledge });
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
+            structuredContent: { ok: true, result }
+          };
+        } catch {
+          // fall through to deterministic
+        }
+      }
+
+      const mined = mineRequirementsDeterministic(text);
+      const result = synthesizeUserStoriesDeterministic({ text, tenantId, requirements: mined.requirements, maxStories: maxItems });
+      result.gaps.push(...mined.gaps);
+      result.followUpQuestions.push(...mined.followUpQuestions);
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
+        structuredContent: { ok: true, result }
+      };
+    }
+  );
+
+  server.registerTool(
+    'Gherkin-Synthesizer',
+    {
+      title: 'Gherkin Synthesizer',
+      description:
+        'Synthesizes Gherkin-style features/scenarios from plain-English meeting transcripts/notes. Uses an LLM if configured (optional) and falls back to deterministic mining.',
+      inputSchema: synthInputSchema,
+      outputSchema: ToolTextResultSchema
+    },
+    async ({ text, tenantId, mode, maxItems }) => {
+      const m = mode ?? 'auto';
+      const llmConfig = getChatCompletionsConfigFromEnv();
+
+      if (m === 'llm' && !llmConfig) {
+        const result = {
+          tenantId,
+          modeUsed: 'deterministic' as const,
+          features: [],
+          gaps: ['LLM mode requested but LLM is not configured.'],
+          followUpQuestions: ['Set LLM_CHAT_COMPLETIONS_URL and LLM_API_KEY (and optionally LLM_AUTH_MODE/LLM_MODEL).']
+        };
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ ok: false, result }, null, 2) }],
+          structuredContent: { ok: false, result }
+        };
+      }
+
+      if ((m === 'auto' || m === 'llm') && llmConfig) {
+        try {
+          const knowledge = knowledgeStore ? await knowledgeStore.readAll().catch(() => undefined) : undefined;
+          const result = await synthesizeGherkinWithLlm({ config: llmConfig, tenantId, text, knowledge });
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
+            structuredContent: { ok: true, result }
+          };
+        } catch {
+          // fall through to deterministic
+        }
+      }
+
+      const mined = mineRequirementsDeterministic(text);
+      const result = synthesizeGherkinDeterministic({ text, tenantId, requirements: mined.requirements, maxScenarios: maxItems });
+      result.gaps.push(...mined.gaps);
+      result.followUpQuestions.push(...mined.followUpQuestions);
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ ok: true, result }, null, 2) }],
+        structuredContent: { ok: true, result }
+      };
+    }
+  );
+
   // -----------------
   // Resources (tenant files)
   // -----------------
@@ -156,6 +276,36 @@ export function createMeetingsMcpServer(options: CreateServerOptions): McpServer
       };
     }
   );
+
+  // -----------------
+  // Resources (static knowledge)
+  // -----------------
+
+  if (knowledgeStore) {
+    server.registerResource(
+      'knowledge-docs',
+      new ResourceTemplate('knowledge://{docId}', {
+        list: async () => {
+          const docs = knowledgeStore.listDocs();
+          return {
+            resources: docs.map(d => ({ uri: `knowledge://${d}`, name: `knowledge: ${d}` }))
+          };
+        }
+      }),
+      {
+        title: 'Knowledge Docs',
+        description: 'Static guidelines for user story structure, Gherkin structure, and mapping meeting text to artifacts.',
+        mimeType: 'text/markdown'
+      },
+      async (uri, { docId }) => {
+        const id = normalizeTemplateVar(docId) as 'user-story-structure' | 'gherkin-structure' | 'mapping-guidelines';
+        const doc = await knowledgeStore.readDoc(id);
+        return {
+          contents: [{ uri: uri.href, text: doc.markdown }]
+        };
+      }
+    );
+  }
 
   // -----------------
   // Prompts
